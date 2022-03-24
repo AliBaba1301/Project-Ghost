@@ -1,11 +1,12 @@
+from gettext import find
 from djitellopy import Tello
 import cv2
-import numpy
+import numpy as np
 import time
+from faceTracking import *
 
-
-image_h = 600
-image_w = 800
+image_h = 360
+image_w = 480
 flight_mode = 0 #0 to turn motors on 1 for testing
 
 # Connecting to the Tello Drone
@@ -34,22 +35,30 @@ def main():
 
     while True:
         frames = drone.get_frame_read()
-        frame = frames.frame
-        vid_stream = cv2.resize(frame,(image_w,image_h))
-          
+        frame = cv2.resize(frames.frame,image_w,image_h)
+        vid_stream = findFace(frame)
 
-        if flight_mode == 0:
-            drone.takeoff()
-            drone.rotate_counter_clockwise(90)
-            drone.rotate_clockwise(90)
-            drone.move_left(35)
-            drone.move_right(35)
+        cv2.imshow('window',vid_stream)  
+
+
+        # Testing to see if drone can perform basic commands when assessing for damage. 
+        # if flight_mode == 0:
+        #     drone.takeoff()
+        #     drone.rotate_counter_clockwise(90)
+        #     drone.rotate_clockwise(90)
+        #     drone.move_left(35)
+        #     drone.move_right(35)
+        #     drone.move_up(35)
+        #     drone.move_down(35)
+        #     drone.move_forward(35)
+        #     drone.move_back(35)
         
-        cv2.imshow('window',vid_stream)
+       
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            stream_control(drone,'off')
+        if cv2.waitKey(1) and 0xFF == ord('q'):
             drone.land()
+            stream_control(drone,'off')
+    
             break
 
 
