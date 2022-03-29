@@ -1,5 +1,5 @@
 from gettext import find
-from djitellopy import Tello
+import tello as Tello
 import cv2
 import numpy as np
 import time
@@ -7,7 +7,7 @@ from faceTracking import *
 
 image_h = 360
 image_w = 480
-flight_mode = 0 #0 to turn motors on 1 for testing
+flight_mode = 1 #0 to turn motors on 1 for testing
 
 # Connecting to the Tello Drone
 def connect_to_drone():
