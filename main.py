@@ -1,5 +1,4 @@
-from gettext import find
-import tello as Tello
+from djitellopy import Tello
 import cv2
 import numpy as np
 import time
@@ -35,9 +34,11 @@ def main():
 
     while True:
         frames = drone.get_frame_read()
-        frame = cv2.resize(frames.frame,image_w,image_h)
-        vid_stream = findFace(frame)
+        frame = cv2.resize(frames.frame,(image_w,image_h))
+        vid_stream, info = findFace(frame)
+        print(info[0][0])
 
+        # cv2.imshow('window',frame)  
         cv2.imshow('window',vid_stream)  
 
 
@@ -58,8 +59,6 @@ def main():
         if cv2.waitKey(1) and 0xFF == ord('q'):
             drone.land()
             stream_control(drone,'off')
-    
-            break
 
 
    
