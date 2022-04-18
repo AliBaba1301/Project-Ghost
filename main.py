@@ -4,9 +4,13 @@ import numpy as np
 import time
 from faceTracking import *
 
+flight_mode = 0 #0 to turn motors on 1 for testing
 image_h = 360
 image_w = 480
-flight_mode = 1 #0 to turn motors on 1 for testing
+pid = [0.5,0,5,0]
+p_error_w,p_error_h = 0,0
+
+
 
 # Connecting to the Tello Drone
 def connect_to_drone():
@@ -28,18 +32,30 @@ def stream_control(drone,command):
         drone.streamoff()
 
 def main():
+    global flight_mode , p_error_w, p_error_h
     drone =  connect_to_drone()
     print(drone.get_battery())
     stream_control(drone,'on')
 
+
+
     while True:
+        
+        # Fly
+        if flight_mode == 0:
+            drone.takeoff()
+            flight_mode = 1
+
         frames = drone.get_frame_read()
         frame = cv2.resize(frames.frame,(image_w,image_h))
-        vid_stream, info = findFace(frame)
-        print(info[0][0])
-
-        # cv2.imshow('window',frame)  
+        vid_stream , info = findFace(frame)
         cv2.imshow('window',vid_stream)  
+
+        p_error_w, p_error_h = trackFace(drone, info, image_w,image_h,pid,p_error_w, p_error_h)
+        # # print(info[0][0])
+        # cv2.imshow('window',vid_stream)  
+        
+        
 
 
         # Testing to see if drone can perform basic commands when assessing for damage. 
