@@ -33,7 +33,7 @@ def findFace(img):
     return img, [[0, 0], 0]
 
 
-def trackFace(drone, info, w, h, pid, p_error_w, p_error_h, p_error_area):
+def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
 
     # PID Controller - Used for smoothing drone transitions
     optimal_w = w//2
@@ -48,18 +48,22 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h, p_error_area):
     # keeps the speed withins range of drone
     speed_h = int(np.clip(speed_h, -100, 100))
 
-    optimal_area = 5500
-    error_area = info[1] - optimal_area
-    speed_area = pid[0] * error_area + pid[1] * (error_area - p_error_area)
-    # keeps the speed withins range of drone
-    speed_area = int(np.clip(speed_area, -100, 100))
-
-
+    # Optimal area for desired camera distance is between 15000 and 16000
+    # Bound like this to prevent collisions with the user
+    if info[1] < 15000 or info[1] > 16000:
+        if info[1] >16000:
+            distance = 'near'
+        elif info[1] < 15000:
+            distance = 'far'
+        
 
     if info[0][0] != 0 and info[0][1] != 0:
         drone.yaw_velocity = speed_w
         drone.up_down_velocity = (speed_h*-1)
-        drone.for_back_velocity = (speed_area*-1)
+        if distance == 'far':
+            drone.move_forward(20)
+        elif distance == 'near':
+            drone.move_back(20)
     else:
         drone.for_back_velocity = 0
         drone.left_right_velocity = 0
@@ -72,4 +76,4 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h, p_error_area):
         drone.send_rc_control(drone.left_right_velocity, drone.for_back_velocity,
                               drone.up_down_velocity, drone.yaw_velocity)
 
-    return error_w, error_h, error_area
+    return error_w, error_h

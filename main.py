@@ -1,3 +1,4 @@
+from distutils.command.clean import clean
 from djitellopy import Tello
 import cv2
 import numpy as np
@@ -8,7 +9,7 @@ flight_mode = 0  # 0 to turn motors on 1 for testing
 image_h = 360
 image_w = 480
 pid = [0.5, 0.5, 0]
-p_error_w, p_error_h, p_error_area = 0, 0, 0
+p_error_w, p_error_h = 0, 0
 
 
 # Connecting to the Tello Drone
@@ -47,14 +48,15 @@ def main():
             flight_mode = 1
 
         frames = drone.get_frame_read()
+        clean_img =  cv2.resize(frames.frame, (image_w, image_h))
         frame = cv2.resize(frames.frame, (image_w, image_h))
         vid_stream, info = findFace(frame)
-        output_concat = np.concatenate((frame, vid_stream), axis=1) 
+        output_concat = np.concatenate((clean_img, vid_stream), axis=1) 
 
         cv2.imshow('window', output_concat)
 
-        p_error_w, p_error_h , p_error_area= trackFace(
-            drone, info, image_w, image_h, pid, p_error_w, p_error_h, p_error_area)
+        p_error_w, p_error_h = trackFace(
+            drone, info, image_w, image_h, pid, p_error_w, p_error_h)
         
 
 
