@@ -48,12 +48,12 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
     # keeps the speed withins range of drone
     speed_h = int(np.clip(speed_h, -100, 100))
 
-    # Optimal area for desired camera distance is between 15000 and 16000
+    # Optimal area for desired camera distance is between 14000 and 16000
     # Bound like this to prevent collisions with the user
-    if info[1] < 15000 or info[1] > 16000:
+    if info[1] < 14000 or info[1] > 16000:
         if info[1] >16000:
             distance = 'near'
-        elif info[1] < 15000:
+        elif info[1] < 14000:
             distance = 'far'
         
 
