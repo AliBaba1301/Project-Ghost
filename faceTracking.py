@@ -17,7 +17,7 @@ def findFace(img):
 
     for(x, y, w, h) in faces:
         cv2.rectangle(img, (x, y), (x+w, y+h), (255, 115, 126), 2)
-        cv2.circle(img, (x + w//2,y+ h//2),2,(255, 115, 126),0)
+        cv2.circle(img, (x + w//2, y + h//2), 2, (255, 115, 126), 0)
 
         # Ensures that the closest face is the one being followed
         cx = x + w/2
@@ -51,11 +51,10 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
     # Optimal area for desired camera distance is between 14000 and 16000
     # Bound like this to prevent collisions with the user
     if info[1] < 14000 or info[1] > 16000:
-        if info[1] >16000:
+        if info[1] > 16000:
             distance = 'near'
         elif info[1] < 14000:
             distance = 'far'
-        
 
     if info[0][0] != 0 and info[0][1] != 0:
         drone.yaw_velocity = speed_w
