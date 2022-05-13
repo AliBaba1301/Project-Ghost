@@ -6,7 +6,7 @@ import numpy as np
 import time
 from faceTracking import *
 
-flight_mode = 1  # 0 to turn motors on 1 for testing
+flight_mode = 0  # 0 to turn motors on 1 for testing
 image_h = 360
 image_w = 480
 pid = [0.5, 0.5, 0]
@@ -59,6 +59,9 @@ def main():
         output_concat = np.concatenate(
             (clean_img, vid_stream, image_for_od), axis=1)
 
+        # output_concat = np.concatenate(
+        #     (clean_img, vid_stream), axis=1)
+
         cv2.imshow('window', output_concat)
 
         p_error_w, p_error_h = trackFace(
@@ -78,7 +81,7 @@ def main():
 
         print(drone.get_battery())
 
-        if cv2.waitKey(1) and 0xFF == ord('a'):
+        if 0xFF == ord('a'):
             drone.land()
             stream_control(drone, 'off')
 

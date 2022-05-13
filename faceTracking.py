@@ -22,19 +22,21 @@ def findFace(img):
         # Ensures that the closest face is the one being followed
         cx = x + w/2
         cy = y + h/2
+        face_width = w
         area = w*h
         faceAreaList.append(area)
         faceCentreList.append([cx, cy])
 
         if len(faceAreaList) != 0:
             i = faceAreaList.index(max(faceAreaList))
-            return img, [faceCentreList[i], faceAreaList[i]]
+            return img, [faceCentreList[i], faceAreaList[i],face_width]
 
-    return img, [[0, 0], 0]
+    return img, [[0, 0], 0, 0]
 
 
 def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
 
+    distance = ''
     # PID Controller - Used for smoothing drone transitions
     optimal_w = w//2
     error_w = info[0][0] - optimal_w
@@ -48,21 +50,19 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
     # keeps the speed withins range of drone
     speed_h = int(np.clip(speed_h, -100, 100))
 
-    # Optimal area for desired camera distance is between 14000 and 16000
-    # Bound like this to prevent collisions with the user
-    if info[1] < 14000 or info[1] > 16000:
-        if info[1] > 16000:
-            distance = 'near'
-        elif info[1] < 14000:
-            distance = 'far'
+    speed_z = 0
+    proximity = int(info[2] / 2.6)
+    target_prox = 50 
+    if proximity > target_prox:
+        speed_z =  -15
+    if proximity < target_prox:
+        speed_z =  15
 
     if info[0][0] != 0 and info[0][1] != 0:
         drone.yaw_velocity = speed_w
         drone.up_down_velocity = (speed_h*-1)
-        if distance == 'far':
-            drone.move_forward(20)
-        elif distance == 'near':
-            drone.move_back(20)
+        drone.for_back_velocity = speed_z
+        print(proximity)
     else:
         drone.for_back_velocity = 0
         drone.left_right_velocity = 0
@@ -72,6 +72,15 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
         error = 0
 
     if drone.send_rc_control:
+        drone.send_rc_control(drone.left_right_velocity, drone.for_back_velocity,
+                              drone.up_down_velocity, drone.yaw_velocity)
+    
+    # stop the drone moving for/back forever
+    if drone.for_back_velocity > 0 or drone.for_back_velocity < 0 :    
+        drone.for_back_velocity = 0
+        drone.left_right_velocity = 0
+        drone.up_down_velocity = 0
+        drone.yaw_velocity = 0                  
         drone.send_rc_control(drone.left_right_velocity, drone.for_back_velocity,
                               drone.up_down_velocity, drone.yaw_velocity)
 
