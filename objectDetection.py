@@ -17,7 +17,7 @@ net.setInputSwapRB(True)
 def yolo_detection(original_image, wanted_images):
     # Only classifies objects once and if certainty is above 60%
 
-    img = cv2.copy(original_image)
+    img = original_image
     classIds, confs, bbox = net.detect(
         img, confThreshold=0.6, nmsThreshold=0.2)
 
@@ -25,7 +25,7 @@ def yolo_detection(original_image, wanted_images):
         box = bbox[i]
         classId = classIds[i] - 1
         conf = confs[i]
-        if classId.upper() in wanted_images:
+        if class_names[classId].upper() in wanted_images:
             filename = 'saved_images/'+classId + conf + '.jpg'
             cv2.imwrite(filename,original_image)
         x, y, w, h = box[0], box[1], box[2], box[3]

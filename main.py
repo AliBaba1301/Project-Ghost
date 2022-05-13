@@ -99,7 +99,7 @@ def main():
         frames = drone.get_frame_read()
         clean_img = cv2.resize(frames.frame, (image_w, image_h))
         frame_od = cv2.resize(frames.frame, (image_w, image_h))
-        image_for_od = yolo_detection(frame_od)
+        image_for_od = yolo_detection(frame_od,wanted_images)
         frame = cv2.resize(frames.frame, (image_w, image_h))
         vid_stream, info = findFace(frame)
 
