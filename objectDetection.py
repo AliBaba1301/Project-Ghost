@@ -14,8 +14,10 @@ net.setInputMean((127.5, 127.5, 127.5))
 net.setInputSwapRB(True)
 
 
-def yolo_detection(img):
+def yolo_detection(original_image, wanted_images):
     # Only classifies objects once and if certainty is above 60%
+
+    img = cv2.copy(original_image)
     classIds, confs, bbox = net.detect(
         img, confThreshold=0.6, nmsThreshold=0.2)
 
@@ -23,7 +25,9 @@ def yolo_detection(img):
         box = bbox[i]
         classId = classIds[i] - 1
         conf = confs[i]
-
+        if classId.upper() in wanted_images:
+            filename = 'saved_images/'+classId + conf + '.jpg'
+            cv2.imwrite(filename,original_image)
         x, y, w, h = box[0], box[1], box[2], box[3]
         cv2.rectangle(img, (x, y), (x+w, h+y), (255, 115, 126), thickness=2)
         cv2.putText(img, f'{class_names[classId].upper()} ~ {round(conf * 100,2)}', (box[0]+10, box[1]+30),
