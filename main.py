@@ -43,6 +43,13 @@ def damage_assessment(drone):
     drone.move_back(35)
 
 
+def low_battery(drone):
+    stream_control(drone, 'off')
+    drone.move_up(50)
+    drone.flip_back()
+    drone.land()
+
+
 def main():
     flight_mode = 1  # 0 to turn motors on 1 for testing
     damage = 0  # 1 to run damage assessment
@@ -87,7 +94,7 @@ def main():
     drone = connect_to_drone()
     print(drone.get_battery())
     stream_control(drone, 'on')
-    predictor, cfg = detr2_get_predictor()
+    # predictor, cfg = detr2_get_predictor()
 
     while True and damage == 0:
         # Fly
@@ -98,7 +105,7 @@ def main():
         frames = drone.get_frame_read()
         clean_img = cv2.resize(frames.frame, (image_w, image_h))
         frame_yolo = cv2.resize(frames.frame, (image_w, image_h))
-        frame_detr = cv2.resize(frames.frame, (image_w, image_h))
+        # frame_detr = cv2.resize(frames.frame, (image_w, image_h))
         image_yolo = yolo_detection(frame_yolo, wanted_images)
         # image_detr = detectron2_detection(
         # frame_detr, wanted_images, predictor, cfg)
@@ -112,6 +119,9 @@ def main():
 
         p_error_w, p_error_h = trackFace(
             drone, info, image_w, image_h, pid, p_error_w, p_error_h)
+
+        if drone.get_battery() <= 10:
+            low_battery(drone)
 
         print(drone.get_battery())
 
