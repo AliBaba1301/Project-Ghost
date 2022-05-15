@@ -29,7 +29,7 @@ def findFace(img):
 
         if len(faceAreaList) != 0:
             i = faceAreaList.index(max(faceAreaList))
-            return img, [faceCentreList[i], faceAreaList[i],face_width]
+            return img, [faceCentreList[i], faceAreaList[i], face_width]
 
     return img, [[0, 0], 0, 0]
 
@@ -52,11 +52,11 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
 
     speed_z = 0
     proximity = int(info[2] / 2.6)
-    target_prox = 50 
+    target_prox = 50
     if proximity > target_prox:
-        speed_z =  -15
+        speed_z = -15
     if proximity < target_prox:
-        speed_z =  15
+        speed_z = 15
 
     if info[0][0] != 0 and info[0][1] != 0:
         drone.yaw_velocity = speed_w
@@ -74,13 +74,13 @@ def trackFace(drone, info, w, h, pid, p_error_w, p_error_h):
     if drone.send_rc_control:
         drone.send_rc_control(drone.left_right_velocity, drone.for_back_velocity,
                               drone.up_down_velocity, drone.yaw_velocity)
-    
+
     # stop the drone moving for/back forever
-    if drone.for_back_velocity > 0 or drone.for_back_velocity < 0 :    
+    if drone.for_back_velocity > 0 or drone.for_back_velocity < 0:
         drone.for_back_velocity = 0
         drone.left_right_velocity = 0
         drone.up_down_velocity = 0
-        drone.yaw_velocity = 0                  
+        drone.yaw_velocity = 0
         drone.send_rc_control(drone.left_right_velocity, drone.for_back_velocity,
                               drone.up_down_velocity, drone.yaw_velocity)
 
