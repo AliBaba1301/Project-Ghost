@@ -49,6 +49,32 @@ def low_battery(drone):
     drone.flip_back()
     drone.land()
 
+def get_targets(names):
+    # Showing all available images types
+    print('The available images class names are:')
+    wanted_images = []
+    wants_images = 'Y'
+    for i in range(len(names)):
+        if i == 0:
+            output = ''
+        elif i % 13 == 0:
+            print(output)
+            output = ''
+        output += ' : ' + names[i].capitalize()
+        if i == len(names) - 1:
+            print(output)
+    # taking input of user requested types
+    while wants_images == 'Y':
+        tag = input('Name a type of image to save: ')
+        if tag.lower() in class_names:
+            wanted_images.append(tag.upper())
+        else:
+            print('Class not available!')
+        wants_images = (
+            input('Would you like to save more image classes? (Y/N) ')).upper()
+    return wanted_images
+
+
 
 def main():
     flight_mode = 1  # 0 to turn motors on 1 for testing
@@ -66,26 +92,7 @@ def main():
     wants_images = (input(
         '\033[1;34;47m Would you like to save the images of a certain type? (Y/N) ')).upper()
     if wants_images == 'Y':
-        # Showing all available images types
-        print('The available images class names are:')
-        for i in range(len(class_names_sorted)):
-            if i == 0:
-                output = ''
-            elif i % 13 == 0:
-                print(output)
-                output = ''
-            output += ' : ' + class_names_sorted[i].capitalize()
-            if i == len(class_names_sorted) - 1:
-                print(output)
-        # taking input of user requested types
-        while wants_images == 'Y':
-            tag = input('Name a type of image to save: ')
-            if tag.lower() in class_names:
-                wanted_images.append(tag.upper())
-            else:
-                print('Class not available!')
-            wants_images = (
-                input('Would you like to save more image classes? (Y/N) ')).upper()
+        wanted_images = get_targets(class_names_sorted)
     print(f'You have selected: {wanted_images}')
 
     # reset the terminal colours
@@ -94,7 +101,8 @@ def main():
     drone = connect_to_drone()
     print(drone.get_battery())
     stream_control(drone, 'on')
-    # predictor, cfg = detr2_get_predictor()
+    predictor, cfg = detr2_get_predictor()
+    counter = 0
 
     while True and damage == 0:
         # Fly
@@ -104,16 +112,21 @@ def main():
 
         frames = drone.get_frame_read()
         clean_img = cv2.resize(frames.frame, (image_w, image_h))
-        frame_yolo = cv2.resize(frames.frame, (image_w, image_h))
-        # frame_detr = cv2.resize(frames.frame, (image_w, image_h))
-        image_yolo = yolo_detection(frame_yolo, wanted_images)
-        # image_detr = detectron2_detection(
-        # frame_detr, wanted_images, predictor, cfg)
+        frame_ssdv3 = cv2.resize(frames.frame, (image_w, image_h))
+        image_ssdv3 = ssdv3_detection(frame_ssdv3, wanted_images)
+
+        if counter % 100 == 0:
+            frame_detr = cv2.resize(frames.frame, (image_w, image_h))
+            image_detr = detectron2_detection(
+            frame_detr, wanted_images, predictor, cfg)
+            
         frame = cv2.resize(frames.frame, (image_w, image_h))
         vid_stream, info = findFace(frame)
 
         output_concat = np.concatenate(
-            (clean_img, vid_stream, image_yolo), axis=1)
+            (clean_img, vid_stream, image_ssdv3, image_detr), axis=1)
+        # output_concat = np.concatenate(
+        #     (clean_img, vid_stream, image_ssdv3), axis=1)
 
         cv2.imshow('window', output_concat)
 
@@ -124,6 +137,7 @@ def main():
             low_battery(drone)
 
         print(drone.get_battery())
+        counter += 1
 
         if cv2.waitKey(1) and 0xFF == ord('a'):
             drone.land()
