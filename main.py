@@ -115,6 +115,11 @@ def main():
         frame_ssdv3 = cv2.resize(frames.frame, (image_w, image_h))
         image_ssdv3 = ssdv3_detection(frame_ssdv3, wanted_images)
 
+        # saving frames so the user can create a video from them
+        filename = 'saved_feed/' str(time.time()) + '.jpg'
+        cv2.imwrite(filename, clean_img)
+
+        # frame skipping
         if counter % 100 == 0:
             frame_detr = cv2.resize(frames.frame, (image_w, image_h))
             image_detr = detectron2_detection(
