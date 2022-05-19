@@ -59,13 +59,13 @@ detr_class_names = ['person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
 
 
 def detr2_get_predictor():
-    model_path = "detectron2/fast_rcnn_R_50_FPN_1x.yaml"
+    model_path = "detectron2/FCNNR50FPN/faster_rcnn_R_50_FPN_3x.yaml"
     cfg = get_cfg()
     cfg.merge_from_file(model_path)
     cfg.MODEL.DEVICE = "cpu"
     # set threshold for this model same as for ssdv3 detection
     cfg.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.6
-    cfg.MODEL.WEIGHTS = 'detectron2/model_final_e5f7ce.pkl'
+    cfg.MODEL.WEIGHTS = 'detectron2/FCNNR50FPN/model_final_280758.pkl'
     predictor = DefaultPredictor(cfg)
     return predictor, cfg
 
