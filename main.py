@@ -77,12 +77,13 @@ def get_targets(names):
 
 
 def main():
-    flight_mode = 1  # 0 to turn motors on 1 for testing
+    flight_mode = 0  # 0 to turn motors on 1 for testing
     damage = 0  # 1 to run damage assessment
     image_h = 360
     image_w = 480
     pid = [0.5, 0.5, 0]
     p_error_w, p_error_h = 0, 0
+    predictor, cfg = detr2_get_predictor()
     # Getting List of image types the user would like to save if they appear in the drone feed
     wanted_images = []
     with open('coco.names', 'rt') as f:
@@ -101,7 +102,6 @@ def main():
     drone = connect_to_drone()
     print(drone.get_battery())
     stream_control(drone, 'on')
-    predictor, cfg = detr2_get_predictor()
     counter = 0
 
     while True and damage == 0:
@@ -116,29 +116,30 @@ def main():
         image_ssdv3 = ssdv3_detection(frame_ssdv3, wanted_images)
 
         # saving frames so the user can create a video from them
-        filename = 'saved_feed/' str(time.time()) + '.jpg'
+        filename = 'saved_feed/' + str(time.time()) + '.jpg'
         cv2.imwrite(filename, clean_img)
 
-        # frame skipping
-        if counter % 100 == 0:
-            frame_detr = cv2.resize(frames.frame, (image_w, image_h))
-            image_detr = detectron2_detection(
-            frame_detr, wanted_images, predictor, cfg)
+        # # frame skipping
+        # if counter % 100 == 0:
+        #     frame_detr = cv2.resize(frames.frame, (image_w, image_h))
+        #     image_detr = detectron2_detection(
+        #     frame_detr, wanted_images, predictor, cfg)
+            
             
         frame = cv2.resize(frames.frame, (image_w, image_h))
         vid_stream, info = findFace(frame)
-
-        output_concat = np.concatenate(
-            (clean_img, vid_stream, image_ssdv3, image_detr), axis=1)
+        
         # output_concat = np.concatenate(
-        #     (clean_img, vid_stream, image_ssdv3), axis=1)
+        #     (clean_img, vid_stream, image_ssdv3, image_detr), axis=1)
+        output_concat = np.concatenate(
+            (clean_img, vid_stream, image_ssdv3), axis=1)
 
         cv2.imshow('window', output_concat)
 
         p_error_w, p_error_h = trackFace(
             drone, info, image_w, image_h, pid, p_error_w, p_error_h)
 
-        if drone.get_battery() <= 10:
+        if drone.get_battery() <= 20:
             low_battery(drone)
 
         print(drone.get_battery())
