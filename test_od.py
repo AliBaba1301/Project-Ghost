@@ -10,7 +10,7 @@ stream_control(drone, 'on')
 stream_control(drone, 'off')
 
 # Test objectDetection as well as ability to save wanted_images
-wanted_images = ['APPLE','FORK',]
+wanted_images = ['APPLE','FORK']
 predictor, cfg = detr2_get_predictor()
 output_dir = 'test_data/saved_images/'
 

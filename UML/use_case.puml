@@ -1,0 +1,33 @@
+@startuml usecase
+scale  5
+left to right direction
+skinparam PackageStyle rect
+skinparam actorStyle awesome
+
+actor agent as a
+usecase (take off) as u1
+usecase (land) as u2
+usecase (move up) as u3
+usecase (move down) as u4
+usecase (move left) as u5
+usecase (move right) as u6
+usecase (move forward) as u7
+usecase (move backward) as u8
+usecase (stream on) as u9 
+usecase (stream off) as u10
+
+a -left- u1
+a -right- u2
+a -- u3
+a -- u4
+a -- u5
+a -- u6
+a -- u7
+a -- u8
+a -- u9 
+a -- u10
+
+u2 <.. u4 :include 
+u1 <.. u3 :include 
+
+@enduml
